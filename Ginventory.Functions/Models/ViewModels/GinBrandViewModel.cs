@@ -1,4 +1,4 @@
-namespace Ginventory.Functions.Data.ViewModels
+namespace Ginventory.Functions.Models.ViewModels
 {
     public class GinBrandViewModel
     {
