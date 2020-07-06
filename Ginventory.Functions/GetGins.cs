@@ -1,11 +1,13 @@
-
+using System.Collections.Generic;
 using System.Linq;
 using Ginventory.Functions.Data;
+using Ginventory.Functions.Models;
 using Ginventory.Functions.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.Logging;
 
 namespace Ginventory.Functions
@@ -83,11 +85,11 @@ namespace Ginventory.Functions
                 .Botanicals
                 .ToList();
 
-           ginpairing.Botanicals = botanicalList
+            ginpairing.Botanicals = botanicalList
                 .Where(botanical =>
                     botanicalPairingIds
                         .Exists(p => p.BotanicalId == botanical.Id)
-                    )
+                )
                 .Select(b => b.Name)
                 .ToList();
 
@@ -104,9 +106,61 @@ namespace Ginventory.Functions
             ginpairing.GinName = _context
                 .Gins
                 .First(g => g.Id == ginId).Name;
+            
+            
+/////-----------------///
+            var gins = _context.Gins.AsQueryable();
+            var botpair = _context
+                    .BotanicalPairings.AsQueryable();
+            var tonicpair = _context.TonicPairings.AsQueryable();
+            var botanicalsQ = _context.Botanicals.AsQueryable();
+            var tonicsQ = _context.Tonics.AsQueryable();
+            // from s in db.Student
+            //     join scg in db.StudentCourseGroup on s.StudentID equals scg.StudentID
+            //     join c in db.Course on scg.CourseID equals c.CourseID
+            //     join g in db.Group on scg.GroupID equals g.GroupID
+            //     where c.CourseName == "xyz"
+            //     select new { s, g } into x
+            //     group x by x.s into studentGroups
+            //     select new MyStudent {
+            //         StudentName = studentGroups.Key.StudentName,
+            //         Groups = studentGroups.Select(sg => sg.g.GroupName)
+            //     };
 
+//https://stackoverflow.com/questions/10505595/linq-many-to-many-relationship-how-to-write-a-correct-where-clause
+//https://www.linqpad.net/
+            // var test = from gin in gins
+            //     join bp in botpair on gin.Id equals bp.GinId
+            //     join tp in tonicpair on gin.Id equals tp.GinId as table1
+            //     join b in botanicalsQ on bp.Id equals b.Id
+            //     join t in tonicsQ on tp.Id equals t.Id 
+            //     where gin.Id == ginId
+            //     select new {gin, b, t} into x
+            //     group x by x.b into pairings
+            //     select new GinPairingViewModel
+            //     {
+            //         GinName = pairings.,
+            //         Tonics = 
+            //         
+            //     };
+                
+                    
 
             return new JsonResult(ginpairing);
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
