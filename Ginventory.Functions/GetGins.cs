@@ -132,8 +132,12 @@ namespace Ginventory.Functions
 							where tp.TonicId == tonic.Id && gin.Id == tp.GinId && gin.Id == ginId
 							select tonic.Name;
 
+			var ginOut = from gin in ginsQ
+						 where (gin.Id == ginId)
+						 select (gin);
 
-			ginpairing.GinName = ginsQ.Where(gin => gin.Id == ginId).First().Name;
+
+			ginpairing.GinName = ginOut.First().Name;
 			ginpairing.Botanicals = botanicalsOut.ToList();
 			ginpairing.Tonics = tonicsOut.ToList();
 			#endregion
