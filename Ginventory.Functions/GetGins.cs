@@ -9,6 +9,8 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Ginventory.Functions
 {
@@ -73,42 +75,41 @@ namespace Ginventory.Functions
             var ginpairing = new GinPairingViewModel();
             var botanicalPairingIds = _context
                 .BotanicalPairings
-                .Where(g => g.GinId == ginId)
-                .ToList();
+                .Where(g => g.GinId == ginId);
+
 
             var tonicPairingIds = _context
                 .TonicPairings
-                .Where(g => g.GinId == ginId)
-                .ToList();
+                .Where(g => g.GinId == ginId);
+
 
             var botanicalList = _context
-                .Botanicals
-                .ToList();
+                .Botanicals;
+                
 
             ginpairing.Botanicals = botanicalList
                 .Where(botanical =>
                     botanicalPairingIds
-                        .Exists(p => p.BotanicalId == botanical.Id)
+                        .Any(p => p.BotanicalId == botanical.Id)
                 )
                 .Select(b => b.Name)
                 .ToList();
 
             var tonicList = _context
-                .Tonics
-                .ToList();
+                .Tonics;
+
 
             ginpairing.Tonics = tonicList
                 .Where(tonic => tonicPairingIds
-                    .Exists(t => t.TonicId == tonic.Id))
-                .Select(t => t.Name)
-                .ToList();
+                    .Any(t => t.TonicId == tonic.Id))
+                .Select(t => t.Name).ToList();
 
             ginpairing.GinName = _context
                 .Gins
                 .First(g => g.Id == ginId).Name;
-            
-            
-/////-----------------///
+
+
+            /////-----------------///
             var gins = _context.Gins.AsQueryable();
             var botpair = _context
                     .BotanicalPairings.AsQueryable();
@@ -127,24 +128,54 @@ namespace Ginventory.Functions
             //         Groups = studentGroups.Select(sg => sg.g.GroupName)
             //     };
 
-//https://stackoverflow.com/questions/10505595/linq-many-to-many-relationship-how-to-write-a-correct-where-clause
-//https://www.linqpad.net/
-            // var test = from gin in gins
-            //     join bp in botpair on gin.Id equals bp.GinId
-            //     join tp in tonicpair on gin.Id equals tp.GinId as table1
-            //     join b in botanicalsQ on bp.Id equals b.Id
-            //     join t in tonicsQ on tp.Id equals t.Id 
-            //     where gin.Id == ginId
-            //     select new {gin, b, t} into x
-            //     group x by x.b into pairings
-            //     select new GinPairingViewModel
-            //     {
-            //         GinName = pairings.,
-            //         Tonics = 
-            //         
-            //     };
-                
-                    
+            //https://stackoverflow.com/questions/10505595/linq-many-to-many-relationship-how-to-write-a-correct-where-clause
+            //https://www.linqpad.net/
+            //var test = from gin in gins
+            //		   join bp in botpair on gin.Id equals bp.GinId
+            //		   join tp in tonicpair on gin.Id equals tp.GinId into table1
+            //		   join b in botanicalsQ on bp.Id equals b.Id
+            //		   join t in tonicsQ on table1. equals t.Id
+            //		   where gin.Id == ginId
+            //		   select new { gin, b, t } into x
+            //		   group x by x.b into pairings
+            //		   select new GinPairingViewModel
+            //		   {
+            //			   GinName = pairings.,
+            //			   Tonics =
+
+
+            //	 };
+
+            //from s in dc.Students
+            //from e in s.StudentCourseEnrollments
+            //where e.Course.CourseID == courseID
+            //select s;
+
+           
+
+            var botanicalsOut = from bot in botanicalsQ
+                         from bp in botpair
+                         from gin in gins
+                         where bp.BotanicalId == bot.Id && gin.Id == bp.GinId && gin.Id == ginId
+                         select bot.Name;
+
+            var tonicsOut = from tonic in tonicsQ
+                            from tp in tonicpair
+                            from gin in gins
+                            where tp.TonicId == tonic.Id && gin.Id == tp.GinId && gin.Id == ginId
+                            select tonic.Name;
+
+
+            ginpairing.GinName =  gins.Where(gin => gin.Id == ginId).First().Name;
+            ginpairing.Botanicals = botanicalsOut.ToList();
+            ginpairing.Tonics = tonicsOut.ToList();
+
+            
+
+
+            
+
+
 
             return new JsonResult(ginpairing);
         }

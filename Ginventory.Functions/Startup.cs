@@ -26,6 +26,7 @@ namespace Ginventory.Functions
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Environment.GetEnvironmentVariable("DefaultConnection")));
+               
             
             builder.Services.AddLogging();
             builder.Services.AddDbContext<ApplicationDbContext>();
