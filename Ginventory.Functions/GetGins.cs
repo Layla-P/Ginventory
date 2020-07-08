@@ -106,12 +106,12 @@ namespace Ginventory.Functions
             ginpairing.GinName = _context
                 .Gins
                 .First(g => g.Id == ginId).Name;
-            
-            
+
+
 /////-----------------///
             var gins = _context.Gins.AsQueryable();
             var botpair = _context
-                    .BotanicalPairings.AsQueryable();
+                .BotanicalPairings.AsQueryable();
             var tonicpair = _context.TonicPairings.AsQueryable();
             var botanicalsQ = _context.Botanicals.AsQueryable();
             var tonicsQ = _context.Tonics.AsQueryable();
@@ -143,24 +143,24 @@ namespace Ginventory.Functions
             //         Tonics = 
             //         
             //     };
-                
-                    
+
+            var botanicalsOut = from bot in botanicalsQ
+                from bp in botpair
+                from gin in gins
+                where bp.BotanicalId == bot.Id && gin.Id == bp.GinId && gin.Id == ginId
+                select bot.Name;
+            var tonicsOut = from tonic in tonicsQ
+                from tp in tonicpair
+                from gin in gins
+                where tp.TonicId == tonic.Id && gin.Id == tp.GinId && gin.Id == ginId
+                select tonic.Name;
+            ginpairing.GinName = gins.Where(gin => gin.Id == ginId).First().Name;
+            ginpairing.Botanicals = botanicalsOut.ToList();
+            ginpairing.Tonics = tonicsOut.ToList();
+
+            botanicalsOut.ToString();
 
             return new JsonResult(ginpairing);
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
